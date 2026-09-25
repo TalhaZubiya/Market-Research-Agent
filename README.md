@@ -45,7 +45,7 @@ The final report is automatically delivered to the requested email address throu
 ## Workflow
 
 <p align="center">
-  <img src="screenshots/workflow-overview.png" alt="Market Research Agent Workflow" width="100%">
+  <img src="02-screenshots/workflow-overview.png" alt="Market Research Agent Workflow" width="100%">
 </p>
 
 ### Workflow Flow
@@ -110,7 +110,7 @@ Clear explanation of sample size, review coverage, missing information, geograph
 
 The final report is formatted as a professional HTML email and delivered automatically through Gmail.
 
-**[View Full Market Research Report](output/02-full-report.pdf)**
+**[View Full Market Research Report](03-output/02-full-report.pdf)**
 
 ---
 
@@ -158,7 +158,7 @@ This approach helps keep the generated report transparent and evidence-based.
 
 The complete workflow is available as an importable JSON file.
 
-**[Download / Import the n8n Workflow](workflow/market-research-agent.json)**
+**[Download / Import the n8n Workflow](01-workflow/Market-Research-Agent.json)**
 
 Before running the workflow, configure your own credentials for the required services.
 

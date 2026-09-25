@@ -106,14 +106,6 @@ Clear explanation of sample size, review coverage, missing information, geograph
 
 ---
 
-## Generated Report
-
-The final report is formatted as a professional HTML email and delivered automatically through Gmail.
-
-**[View Full Market Research Report](03-output/02-full-report.pdf)**
-
----
-
 ## Key Technologies
 
 <p align="center">

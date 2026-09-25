@@ -1,0 +1,419 @@
+{
+  "name": "My workflow 6143",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Market Research Agent",
+        "formDescription": "Analyze markets, discover trends, identify opportunities, and generate actionable market insights.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Search Query",
+              "placeholder": "Enter your query",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Location",
+              "placeholder": "Enter location",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Country Code",
+              "placeholder": "Enter 2-letter country code (e.g., us, bd, gb)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Language",
+              "placeholder": "Enter language",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Business Category",
+              "placeholder": "Enter business category",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "City Name",
+              "placeholder": "Enter city name"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Enter your email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bef65266-aab1-4894-b792-8c4b710fdd9e",
+      "name": "On form submission",
+      "webhookId": "bd59f4b6-82c8-43c0-ae3f-d8d9401559e1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5989d71e-20a4-4d76-a87f-5381217111a6",
+              "name": "Search Query",
+              "value": "={{ $json['Search Query'] }}",
+              "type": "string"
+            },
+            {
+              "id": "7662695d-67e8-4e24-87b1-37453b64f993",
+              "name": "Location",
+              "value": "={{ $json.Location }}",
+              "type": "string"
+            },
+            {
+              "id": "237be8ec-ba5d-4a06-a5ff-544ef1578323",
+              "name": "Business Category",
+              "value": "={{ $json['Business Category'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2eb23d8d-189b-485b-8691-307c4e785dc2",
+              "name": "City Name",
+              "value": "={{ $json['City Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "72b8831f-0302-4b54-8525-970a970b9140",
+              "name": "Country Code",
+              "value": "={{ $json['Country Code'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "4120a8df-e62b-4f53-903a-4a706c163c1d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "google_maps",
+        "q": "={{ $json['Search Query'] }}",
+        "additionalFields": {
+          "hl": "en",
+          "gl": "={{ $json['Country Code'] }}"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "a576d09a-5747-4ee8-9815-689b2073bb81",
+      "name": "Google_maps search",
+      "credentials": {
+        "serpApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_SERPAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.first().json.local_results || [];\n\nconst userInput = $('On form submission').first().json;\n\nconst structuredData = results.slice(0, 5).map(place => ({\n  business_name: place.title || null,\n  category: place.type || null,\n  address: place.address || null,\n  rating: place.rating || null,\n  reviews_count: place.reviews || 0,\n  reviews_link: place.reviews_link || null,\n  phone: place.phone || null,\n  website: place.website || null,\n\n  coordinates: {\n    latitude: place.gps_coordinates?.latitude || null,\n    longitude: place.gps_coordinates?.longitude || null\n  },\n\n  opening_hours: place.operating_hours || null,\n  price_level: place.price_level || null,\n\n  search_context: {\n    search_query: userInput.search_query,\n    location: userInput.Location,\n    language: userInput.Langauge,\n    business_category: userInput['business category'],\n    city_name: userInput.city_name\n  }\n}));\n\nreturn structuredData.map(item => ({\n  json: item\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "8ce60b3c-a0f6-4c81-8570-3ff7ef079dfd",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        896,
+        0
+      ],
+      "id": "9ed10ce6-6b6c-4fb6-8843-01da6d045a50",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.reviews_link }}",
+        "sendQuery": true,
+        "specifyQuery": "json",
+        "jsonQuery": "={\n  \"api_key\": \"YOUR_SERPAPI_API_KEY\"\n}",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "timeout": 3000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "94e916da-3911-4859-a14a-3083bc8e281a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const business = $('Loop Over Items').item.json;\nconst reviewResponse = $input.first().json;\n\nconst reviews = reviewResponse.reviews || [];\n\nconst cleanReviews = reviews.map(review => ({\n  author: review.user?.name || null,\n  rating: review.rating || null,\n  text: review.snippet || review.text || null,\n  date: review.date || null\n}));\n\nreturn [\n  {\n    json: {\n      business_name: business.business_name,\n      category: business.category,\n      address: business.address,\n      rating: business.rating,\n      reviews_count: business.reviews_count,\n      phone: business.phone,\n      website: business.website,\n\n      coordinates: business.coordinates,\n      opening_hours: business.opening_hours,\n      price_level: business.price_level,\n\n      reviews: cleanReviews,\n\n      review_summary: {\n        total_reviews_fetched: cleanReviews.length,\n        average_rating:\n          cleanReviews.length > 0\n            ? (\n                cleanReviews.reduce(\n                  (sum, review) => sum + (Number(review.rating) || 0),\n                  0\n                ) / cleanReviews.length\n              ).toFixed(2)\n            : null\n      },\n\n      search_context: business.search_context\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        96
+      ],
+      "id": "c21167ef-12fe-498f-a39b-1f0a0381b95f",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        -48
+      ],
+      "id": "0d880404-deab-4710-903d-3228a9da252d",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// Find the aggregated business data\nconst businesses =\n  data.data ||\n  data.items ||\n  data.records ||\n  [];\n\nconst organizedBusinesses = businesses.map((business, index) => {\n  const reviews = business.reviews || [];\n\n  return {\n    business_id: index + 1,\n\n    business: {\n      name: business.business_name || null,\n      category: business.category || null,\n      address: business.address || null,\n      phone: business.phone || null,\n      website: business.website || null\n    },\n\n    performance: {\n      rating: business.rating || null,\n      total_reviews: business.reviews_count || 0,\n      fetched_reviews: reviews.length\n    },\n\n    pricing: {\n      price_level: business.price_level || null\n    },\n\n    location: {\n      latitude: business.coordinates?.latitude || null,\n      longitude: business.coordinates?.longitude || null\n    },\n\n    opening_hours: business.opening_hours || null,\n\n    customer_reviews: reviews.map(review => ({\n      author: review.author || null,\n      rating: review.rating || null,\n      text: review.text || null,\n      date: review.date || null\n    })),\n\n    review_summary: business.review_summary || {\n      total_reviews_fetched: reviews.length,\n      average_rating: null\n    }\n  };\n});\n\nreturn [\n  {\n    json: {\n      research: {\n  query: $('Edit Fields').first().json['Search Query'],\n  location: $('Edit Fields').first().json['Location'],\n  country_code: $('Edit Fields').first().json['Country Code'],\n  language: $('On form submission').first().json['Language'],\n  business_category: $('Edit Fields').first().json['Business Category'],\n  city: $('Edit Fields').first().json['City Name']\n},\n\n      dataset_summary: {\n        total_businesses: organizedBusinesses.length\n      },\n\n      businesses: organizedBusinesses\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        -48
+      ],
+      "id": "26d13f6a-da41-4cc7-996b-e80f00c019ed",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI Market Research Analyst specializing in local market research, competitor analysis, customer experience, business intelligence, and opportunity discovery.\n\nYour task is to analyze the collected local business data and customer reviews and generate a professional, evidence-based market research report.\n\nThe report will be sent directly to a client through Gmail as an HTML email.\n\nIMPORTANT RULES:\n\n* Use only the data provided below.\n* Never invent missing information, statistics, prices, revenue, market size, market share, customer numbers, or competitors.\n* Use actual ratings, review counts, review text, pricing information, and business information whenever available.\n* Clearly distinguish between observed facts and analytical insights.\n* Treat the collected businesses as a sample of the market, not the complete market.\n* Do not assume that the collected businesses represent every competitor in the area.\n* If information is unavailable, write \"Not available in the collected data.\"\n* Do not make unsupported claims or guarantees.\n* Recommendations must be connected to actual findings from the collected data.\n* Do not claim that an opportunity will definitely be successful.\n* When calculating percentages or averages, calculate them only from the provided data.\n* Do not use outside knowledge or assumptions unless explicitly provided in the input.\n\nRESEARCH INFORMATION:\n\nSearch Query:\n{{ $json.research.query }}\n\nLocation:\n{{ $json.research.location }}\n\nCountry:\n{{ $json.research.country_code }}\n\nLanguage:\n{{ $json.research.language }}\n\nBusiness Category:\n{{ $json.research.business_category }}\n\nCity:\n{{ $json.research.city }}\n\nCOLLECTED BUSINESS DATA:\n\n{{ JSON.stringify($json.businesses, null, 2) }}\n\nANALYZE THE DATA AND CREATE THE FOLLOWING REPORT:\n\n1. EXECUTIVE SUMMARY\n\nProvide a concise overview of the research.\n\nInclude:\n\n* Number of businesses analyzed\n* General competitive landscape\n* Overall rating patterns\n* Important customer feedback patterns\n* Major market observations\n* Potential opportunities suggested by the data\n\nKeep this section concise and focused on the most important findings.\n\n2. MARKET OVERVIEW\n\nAnalyze the collected market based on:\n\n* Number of businesses\n* Business categories\n* Rating distribution\n* Review volume\n* Price levels, if available\n* Common services or offerings\n* Location patterns\n* Other noticeable patterns\n\nUse actual numbers whenever possible.\n\nDo not describe the entire market as if the collected dataset represents the complete market.\n\n3. COMPETITOR ANALYSIS\n\nCompare the businesses using available information such as:\n\n* Business name\n* Category\n* Rating\n* Total review count\n* Number of collected reviews\n* Price level\n* Location\n* Website\n* Services or offerings\n* Customer feedback\n\nPresent the comparison in an HTML table when enough information is available.\n\nFocus on observable differences between the businesses.\n\nDo not rank businesses as \"best\" or \"worst\" unless the data clearly supports a factual comparison, and avoid unsupported conclusions.\n\n4. CUSTOMER REVIEW ANALYSIS\n\nAnalyze the collected customer reviews.\n\nIdentify:\n\n* Common positive feedback\n* Common complaints\n* Customer expectations\n* Frequently mentioned products or services\n* Recurring problems\n* Service quality patterns\n* Customer experience patterns\n* Rating-related patterns\n\nSeparate frequently recurring themes from isolated comments.\n\nWhen possible, mention how many reviews support an observed pattern.\n\n5. COMPETITOR STRENGTHS AND WEAKNESSES\n\nIdentify observable strengths and weaknesses for the analyzed businesses.\n\nBase these observations only on:\n\n* Ratings\n* Review volume\n* Customer reviews\n* Services\n* Pricing information\n* Business information\n* Other available evidence\n\nAvoid making assumptions about internal operations that are not visible in the data.\n\nFor example, do not claim that a business has \"poor management\" simply because customers complain about service delays.\n\nInstead, describe the observable issue, such as:\n\n\"Several reviews mention long waiting times.\"\n\n6. MARKET GAPS AND OPPORTUNITIES\n\nIdentify potential market gaps or opportunities suggested by the collected data.\n\nLook for:\n\n* Repeated customer complaints\n* Unmet customer needs\n* Frequently requested services\n* Poorly rated areas\n* Services that appear underrepresented\n* Customer experience problems\n* Differences between competitors\n* Areas where businesses appear to have limited offerings\n\nFor every opportunity, explain the evidence behind it.\n\nDo not present opportunities as guaranteed business success.\n\n7. KEY TRENDS AND PATTERNS\n\nIdentify the most important patterns across the dataset.\n\nExamples include:\n\n* Rating patterns\n* Review volume patterns\n* Common customer preferences\n* Recurring complaints\n* Pricing patterns\n* Service patterns\n* Competitive differences\n* Customer experience trends\n\nUse numbers or percentages when they can be reliably calculated.\n\n8. ACTIONABLE RECOMMENDATIONS\n\nProvide practical recommendations for someone who wants to enter, improve, or compete in this market.\n\nEach recommendation must be connected to an actual finding from the research.\n\nFor each recommendation, explain:\n\n* Recommendation\n* Evidence from the data\n* Why it may be relevant\n* Possible implementation direction\n\nDo not make guarantees about revenue, growth, or success.\n\n9. DATA LIMITATIONS\n\nClearly explain the limitations of the research.\n\nConsider:\n\n* Number of businesses collected\n* Number of reviews collected\n* Missing pricing information\n* Missing service information\n* Missing business information\n* Limited geographic coverage\n* Limited review sample\n* Potential differences between search results and the complete market\n\nMake it clear that this is a data-driven sample analysis, not a complete market census.\n\n10. FINAL TAKEAWAYS\n\nProvide 5–7 concise takeaways from the research.\n\nEach takeaway should represent an important finding, pattern, opportunity, or practical insight supported by the collected data.\n\nHTML FORMATTING REQUIREMENTS:\n\nThe final response will be sent directly through Gmail as an HTML email.\n\nReturn ONLY clean HTML content.\n\nUse:\n\n* <h2> for main sections\n* <h3> for subsections\n* <p> for paragraphs\n* <ul> and <li> for bullet points\n* <ol> and <li> for numbered lists\n* <strong> for important terms\n* <table> for competitor comparisons\n* <thead> and <tbody> for tables\n* <tr>, <th>, and <td> for table rows and cells\n\nDo NOT use:\n\n* Markdown headings such as # or ##\n* Markdown bold such as **\n* Markdown bullet points using -\n* Markdown tables\n* Code blocks\n* ```html\n  ```\n* ```\n  ```\n* <html>\n* <head>\n* <body>\n\nThe email template already provides the HTML document structure.\n\nTABLE FORMATTING:\n\nFor tables, use clean inline styles so they display properly in Gmail.\n\nExample:\n\n<table style=\"width:100%; border-collapse:collapse; margin:20px 0; font-size:14px;\">\n  <thead>\n    <tr>\n      <th style=\"padding:10px; border:1px solid #e5e7eb; text-align:left; background:#f3f4f6;\">Business</th>\n      <th style=\"padding:10px; border:1px solid #e5e7eb; text-align:left; background:#f3f4f6;\">Rating</th>\n      <th style=\"padding:10px; border:1px solid #e5e7eb; text-align:left; background:#f3f4f6;\">Reviews</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td style=\"padding:10px; border:1px solid #e5e7eb;\">Example Business</td>\n      <td style=\"padding:10px; border:1px solid #e5e7eb;\">4.5</td>\n      <td style=\"padding:10px; border:1px solid #e5e7eb;\">120</td>\n    </tr>\n  </tbody>\n</table>\n\nUse tables only when they improve readability.\n\nGENERAL WRITING STYLE:\n\n* Professional\n* Clear\n* Concise but informative\n* Evidence-based\n* Business-oriented\n* Easy to scan\n* Suitable for a professional client\n* Avoid unnecessary filler\n* Avoid repetitive explanations\n* Prefer specific findings over generic business advice\n\nThe final report should feel like a professional market research report prepared for a real business decision-maker, not like a generic AI chatbot response.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1600,
+        -48
+      ],
+      "id": "d4b26ecf-396f-4d77-97de-45d67ddeb954",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "=Market Research for  {{ $('Edit Fields').item.json['Search Query'] }}",
+        "message": "=<div style=\"margin:0; padding:0; background:#f3f4f6; font-family:Arial, Helvetica, sans-serif; color:#1f2937;\">\n\n  <div style=\"max-width:900px; margin:20px auto; background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;\">\n\n    <!-- HEADER -->\n    <div style=\"background:#111827; padding:32px 36px; color:#ffffff;\">\n\n      <div style=\"font-size:12px; letter-spacing:1.5px; color:#9ca3af; margin-bottom:10px;\">\n        AI-POWERED MARKET RESEARCH\n      </div>\n\n      <div style=\"font-size:28px; font-weight:600;\">\n        Market Research Report\n      </div>\n\n      <div style=\"font-size:14px; color:#d1d5db; margin-top:8px;\">\n        Local Market &amp; Competitor Analysis\n      </div>\n\n    </div>\n\n\n    <!-- RESEARCH INFORMATION -->\n    <div style=\"padding:24px 36px; background:#f9fafb; border-bottom:1px solid #e5e7eb;\">\n\n      <div style=\"font-size:13px; font-weight:600; color:#374151; margin-bottom:14px;\">\n        RESEARCH INFORMATION\n      </div>\n\n      <table style=\"width:100%; border-collapse:collapse; font-size:13px;\">\n\n        <tr>\n          <td style=\"padding:6px 0; width:150px; color:#6b7280;\">\n            Search Query\n          </td>\n\n          <td style=\"padding:6px 0; font-weight:600; color:#111827;\">\n            {{ $('Code in JavaScript2').first().json.research.query || 'Market Research' }}\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:6px 0; color:#6b7280;\">\n            Location\n          </td>\n\n          <td style=\"padding:6px 0; font-weight:600; color:#111827;\">\n            {{ $('Code in JavaScript2').first().json.research.location || 'Not specified' }}\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:6px 0; color:#6b7280;\">\n            Business Category\n          </td>\n\n          <td style=\"padding:6px 0; font-weight:600; color:#111827;\">\n            {{ $('Code in JavaScript2').first().json.research.business_category || 'Not specified' }}\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:6px 0; color:#6b7280;\">\n            City\n          </td>\n\n          <td style=\"padding:6px 0; font-weight:600; color:#111827;\">\n            {{ $('Code in JavaScript2').first().json.research.city || 'Not specified' }}\n          </td>\n        </tr>\n\n      </table>\n\n    </div>\n\n\n    <!-- AI GENERATED REPORT -->\n    <div style=\"\n      padding:36px;\n      font-size:15px;\n      line-height:1.75;\n      color:#374151;\n    \">\n\n      {{ $json.output }}\n\n    </div>\n\n\n    <!-- FOOTER -->\n    <div style=\"\n      padding:22px 36px;\n      background:#f9fafb;\n      border-top:1px solid #e5e7eb;\n      text-align:center;\n    \">\n\n      <div style=\"font-size:12px; color:#6b7280;\">\n        Generated by Market Research Agent\n      </div>\n\n      <div style=\"font-size:11px; color:#9ca3af; margin-top:6px;\">\n        This report is based on collected data and may not represent the entire market.\n      </div>\n\n    </div>\n\n  </div>\n\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1968,
+        -48
+      ],
+      "id": "e0636753-2c03-46e6-99da-759ea0fd1ba2",
+      "name": "Send a message",
+      "webhookId": "dfc8a293-10b5-4444-a340-de5c4c4431de",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_GMAILOAUTH2_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        160
+      ],
+      "id": "d73c1407-fb22-4765-9632-3d7b7b54d26c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_GOOGLEPALMAPI_CREDENTIAL"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Google_maps search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_maps search": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e505fe38-0f5d-4e58-b78d-6ff92c2a0ee9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5f00bba974abf03cb5183d4d65f8a9645a781b04770df6a7d08284fca87d50b3"
+  },
+  "nodeGroups": [],
+  "id": "6V4wjKpzKncxJK3Y",
+  "tags": []
+}

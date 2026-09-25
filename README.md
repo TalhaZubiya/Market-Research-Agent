@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  An AI-powered n8n automation that collects local business data, analyzes customer reviews, identifies market patterns, and generates a professional market research report automatically.
+  An AI-powered n8n automation that collects local business data, analyzes customer reviews, identifies market patterns, and generates professional market research reports automatically.
 </p>
 
 ---
@@ -30,15 +30,15 @@ The final report is automatically delivered to the requested email address throu
 
 * Collects local business information from Google Maps results
 * Retrieves available customer reviews
-* Structures business and review data
-* Aggregates multiple business records into a research dataset
-* Uses Google Gemini to analyze the collected information
-* Identifies customer feedback patterns and recurring issues
+* Structures and cleans business and review data
+* Aggregates multiple business records
+* Uses Google Gemini for market analysis
+* Identifies customer feedback patterns
 * Performs competitor analysis
 * Detects potential market gaps and opportunities
-* Generates actionable, data-driven recommendations
-* Produces a professional HTML market research report
-* Automatically delivers the final report through Gmail
+* Generates data-driven recommendations
+* Creates a professional HTML market research report
+* Automatically delivers the report through Gmail
 
 ---
 
@@ -72,31 +72,9 @@ Gmail Delivery
 
 ---
 
-## Input
-
-The workflow starts with a custom n8n form where the user provides the research requirements.
-
-<p align="center">
-  <img src="screenshots/input-form.png" alt="Market Research Agent Input Form" width="700">
-</p>
-
-### Input Fields
-
-* Search Query
-* Location
-* Country Code
-* Language
-* Business Category
-* City Name
-* Email Address
-
----
-
 ## AI Market Analysis
 
-The AI Agent is instructed to work only with the collected dataset and avoid unsupported assumptions.
-
-The generated analysis includes:
+The AI Agent analyzes the collected dataset and generates a structured market research report.
 
 ### Executive Summary
 
@@ -112,7 +90,7 @@ Comparison of available business information, ratings, reviews, pricing, locatio
 
 ### Customer Review Analysis
 
-Identification of recurring positive feedback, complaints, customer expectations, service patterns, and experience-related issues.
+Identification of recurring positive feedback, complaints, customer expectations, service patterns, and customer experience issues.
 
 ### Market Gaps & Opportunities
 
@@ -132,24 +110,20 @@ Clear explanation of sample size, review coverage, missing information, geograph
 
 The final report is formatted as a professional HTML email and delivered automatically through Gmail.
 
-### Report Preview
-
-<p align="center">
-  <img src="output/report-overview.png" alt="Generated Market Research Report" width="900">
-</p>
-
-### Full Report
-
-**[View the Complete Market Research Report (PDF)](output/market-research-report.pdf)**
+**[View Full Market Research Report](output/02-full-report.pdf)**
 
 ---
 
 ## Key Technologies
 
 <p align="center">
-
-<img src="https://cdn.simpleicons.org/n8n/EA4B71" width="42" alt="n8n">   <img src="https://cdn.simpleicons.org/google/4285F4" width="42" alt="Google">   <img src="https://cdn.simpleicons.org/gmail/EA4335" width="42" alt="Gmail">   <img src="https://cdn.simpleicons.org/javascript/F7DF1E" width="42" alt="JavaScript">
-
+  <img src="https://cdn.simpleicons.org/n8n/EA4B71" width="42" alt="n8n">
+  &nbsp;&nbsp;
+  <img src="https://cdn.simpleicons.org/google/4285F4" width="42" alt="Google">
+  &nbsp;&nbsp;
+  <img src="https://cdn.simpleicons.org/gmail/EA4335" width="42" alt="Gmail">
+  &nbsp;&nbsp;
+  <img src="https://cdn.simpleicons.org/javascript/F7DF1E" width="42" alt="JavaScript">
 </p>
 
 * **n8n** — Workflow automation and orchestration
